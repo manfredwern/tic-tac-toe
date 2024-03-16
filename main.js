@@ -10,7 +10,7 @@ document.querySelector('#app').innerHTML = `
 
 <div id="board-container"><div id="board"></div></div>`;
 
-// Initialize the board game
+// Initialize Board Game
 const newGame = new Game();
 newGame.setupGame();
 newGame.startGame();

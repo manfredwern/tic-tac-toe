@@ -4,7 +4,7 @@ function generatePlayingField() {
     let cells = [];
     for (let index = 1; index <= MAX_CELL_COUNT; index++) {
         cells.push({
-            cell: index,
+            cellId: index,
             player: "",
             class: ""
         });
