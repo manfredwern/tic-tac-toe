@@ -8,7 +8,7 @@ export default class Game extends Board {
     constructor() {
         super();
         this.lastAction = {};
-        this.playersAction = [];
+        this.moveHistory = [];
         this.hasWinner = false;
         this.isFirstPlayerTurn = true; // Set player 1 as the starting player
         this.players = new Players();
@@ -37,7 +37,6 @@ export default class Game extends Board {
         this.players.addPlayer('Jack');
         this.setCurrentPlayer();
         this.updatePlayerInfo(this.players.currentPlayer.name + ' starts the game');
-        this.addActionsToDom();
     }
 
     addCellClickEvents() {
@@ -49,7 +48,7 @@ export default class Game extends Board {
 
                 this.markBoardCell(boardCell, cellElement);
                 this.disableUndoButton(false);
-                this.addActionsToDom(this.lastAction);
+                this.updateMoveHistory(this.lastAction);
                 this.checkForWinningPlayer(this.players.currentPlayer.name);
                 this.switchPlayerTurn();
                 this.updateNextPlayerStatus();
@@ -57,8 +56,8 @@ export default class Game extends Board {
         }
     }
 
-    addActionsToDom(action) {
-        document.querySelector('pre#action-list').innerHTML = action ? JSON.stringify(action) + '\n' : '';
+    updateMoveHistory(action) {
+        document.querySelector('pre#action-list').innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
     }
 
     addUndoClickEvent() {
@@ -69,13 +68,14 @@ export default class Game extends Board {
     }
 
     undoAction(lastAction) {
-        if (!this.playersAction.length) { return }
+        if (!this.moveHistory.length) { return }
 
         // Update Board status
         this.unmarkBoardCell(lastAction);
         this.switchPlayerTurn();
         this.updateNextPlayerStatus()
         this.disableUndoButton(true);
+        this.updateMoveHistory();
     }
 
     disableUndoButton(bool = true) {
@@ -97,7 +97,7 @@ export default class Game extends Board {
     updateNextPlayerStatus() {
         if (this.hasWinner) { return }
         // Do not update if the games ends or a player wins
-        if (this.playersAction.length === this.playingBoard.length) {
+        if (this.moveHistory.length === this.playingBoard.length) {
             this.updatePlayerInfo('It\'s a draw!');
             this.disableUndoButton(true);
             return;

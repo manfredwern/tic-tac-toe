@@ -172,8 +172,11 @@ button:focus-visible {
   background-color: lightpink;
 }
 
-pre {
+pre#action-list {
+  width: 400px;
   height: 180px;
   overflow: scroll;
   white-space: pre;
+  text-wrap: balance;
+  text-align: left;
 }

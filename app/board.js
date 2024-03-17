@@ -27,7 +27,7 @@ export default class Board {
                 item.player = this.players.currentPlayer.name;
                 item.class = this.players.currentPlayer.class;
                 this.lastAction = item;
-                this.playersAction.push(this.lastAction);
+                this.moveHistory.push(this.lastAction);
             }
             return item;
         });
@@ -47,7 +47,7 @@ export default class Board {
 
                 item.player = '';
                 item.class = '';
-                this.playersAction = this.playersAction.filter(action => action !== boardCell);
+                this.moveHistory = this.moveHistory.filter(action => action !== boardCell);
             }
             return item;
         });
