@@ -1,8 +1,7 @@
-import { BOARD_CELLS } from "../constants/playingBoard";
 import { WIN_COMBINATIONS } from "../constants/combination";
 import Players from "./players";
 import Board from './board';
-import { isSubset } from './utils';
+import { isSubset } from '../utils/isSubset';
 
 export default class Game extends Board {
 
@@ -19,42 +18,51 @@ export default class Game extends Board {
     bind() {
         this.addCellClickEvents = this.addCellClickEvents.bind(this);
         this.addUndoClickEvent = this.addUndoClickEvent.bind(this);
-        this.initializePlayers = this.addPlayers.bind(this);
+        this.startGame = this.startGame.bind(this);
         this.setCurrentPlayer = this.setCurrentPlayer.bind(this);
+        this.checkForWinningPlayer = this.checkForWinningPlayer.bind(this);
+        this.highlightWinBoardCells = this.highlightWinBoardCells.bind(this);
     }
 
     setupGame() {
         this.createBoard();
         this.addCellClickEvents();
         this.addUndoClickEvent();
-        this.showActionsList();
+        this.disableUndoButton(true);
     }
 
     startGame() {
-        this.addPlayers();
+        // Setup Players
+        this.players.addPlayer('Cactus', 'human');
+        this.players.addPlayer('Jack');
         this.setCurrentPlayer();
-        this.updatePlayerInfo(this.players.currentPlayer.alias);
+        this.updatePlayerInfo(this.players.currentPlayer.name + ' starts the game');
+        this.addActionsToDom();
     }
 
     addCellClickEvents() {
-        for (const boardCell of BOARD_CELLS) {
+        console.log('addCellClickEvents', this.playingBoard);
+        for (const boardCell of this.playingBoard) {
             let cellElement = document.querySelector('#cell' + boardCell.cellId);
             cellElement.addEventListener('click', () => {
                 if (cellElement.classList.contains('clicked') || this.hasWinner) { return }
 
                 this.markBoardCell(boardCell, cellElement);
-                this.enableUndoButton();
-
-                document.querySelector('pre').innerHTML += JSON.stringify(this.lastAction) + '\n';
-                this.checkIfPlayerWon(this.players.currentPlayer.alias);
+                this.disableUndoButton(false);
+                this.addActionsToDom(this.lastAction);
+                this.checkForWinningPlayer(this.players.currentPlayer.name);
                 this.switchPlayerTurn();
                 this.updateNextPlayerStatus();
-            })
+            });
         }
     }
 
+    addActionsToDom(action) {
+        document.querySelector('pre#action-list').innerHTML = action ? JSON.stringify(action) + '\n' : '';
+    }
+
     addUndoClickEvent() {
-        const undoBtn = document.querySelector('.undo-btn button');
+        const undoBtn = document.querySelector('button#undo');
         undoBtn.addEventListener('click', () => {
             this.undoAction(this.lastAction);
         })
@@ -67,26 +75,12 @@ export default class Game extends Board {
         this.unmarkBoardCell(lastAction);
         this.switchPlayerTurn();
         this.updateNextPlayerStatus()
-        this.disableUndoButton();
+        this.disableUndoButton(true);
     }
 
-    disableUndoButton() {
-        document.querySelector('.undo-btn button').setAttribute('disabled', true);
-    }
-
-    enableUndoButton() {
-        document.querySelector('.undo-btn button').removeAttribute('disabled');
-    }
-
-    showActionsList() {
-        const pre = document.createElement('pre');
-        document.querySelector('#app').appendChild(pre);
-    }
-
-    // initialize players
-    addPlayers() {
-        this.players.setPlayer('Cactus', 'human');
-        this.players.setPlayer('Jack');
+    disableUndoButton(bool = true) {
+        const button = document.querySelector('button#undo');
+        bool ? button.setAttribute('disabled', '') : button.removeAttribute('disabled');
     }
 
     setCurrentPlayer() {
@@ -103,25 +97,30 @@ export default class Game extends Board {
     updateNextPlayerStatus() {
         if (this.hasWinner) { return }
         // Do not update if the games ends or a player wins
-        if (this.playersAction.length === BOARD_CELLS.length) {
-            this.updatePlayerInfo('the end');
+        if (this.playersAction.length === this.playingBoard.length) {
+            this.updatePlayerInfo('It\'s a draw!');
+            this.disableUndoButton(true);
             return;
         }
 
-        this.updatePlayerInfo(this.players.currentPlayer.alias);
+        const suffixMessage = this.players.currentPlayer.name.match(/s$/) ? '\' turn' : '\'s turn';
+        this.updatePlayerInfo(this.players.currentPlayer.name + suffixMessage);
     }
 
-    checkIfPlayerWon(player) {
-        let playerCells = this.playingBoard.filter(item => item.player === player).map(item => item.cellId);
-
-        for (const combination of WIN_COMBINATIONS) {
-            let isMatch = isSubset(playerCells, combination);
-
-            if (isMatch) {
-                console.log('The winner is: ', player);
-                this.updatePlayerInfo('The winner is: ' + player);
+    checkForWinningPlayer(playerName) {
+        let markedBoardCells = this.playingBoard.filter(item => item.player === playerName).map(item => item.cellId);
+        console.log('board: ', this.playingBoard);
+        console.log('marked: ', markedBoardCells);
+        for (const winCombination of WIN_COMBINATIONS) {
+            let winner = isSubset(markedBoardCells, winCombination);
+            if (winner) {
+                console.log('winner', winner);
+                console.log('winner', markedBoardCells);
+                console.log('winner', winCombination);
+                this.updatePlayerInfo('The winner is: ' + playerName);
                 this.hasWinner = true;
-                this.disableUndoButton();
+                this.disableUndoButton(true);
+                this.highlightWinBoardCells(winCombination);
                 return;
             }
         }
@@ -130,6 +129,5 @@ export default class Game extends Board {
     updatePlayerInfo(player) {
         document.querySelector('.active-game').innerHTML = player
     }
-
 }
 

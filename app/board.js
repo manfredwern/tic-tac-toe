@@ -1,37 +1,30 @@
-import { BOARD_CELLS } from "../constants/playingBoard";
+import { generateBoardCellsData } from "../constants/playingBoard";
 
 export default class Board {
-
     constructor() {
-        this.playingBoard = [...BOARD_CELLS];
+        this.playingBoard = generateBoardCellsData();
         this.boardCellsHTML = '';
     }
 
     createBoard() {
-        for (const boardCell of BOARD_CELLS) {
+        for (const boardCell of this.playingBoard) {
             let div = document.createElement('div');
             div.setAttribute('id', 'cell' + boardCell.cellId);
             div.setAttribute('class', 'cell');
-
-            let span = document.createElement('span');
-            span.innerHTML = boardCell.cellId;
-
-            div.appendChild(span);
             this.boardCellsHTML += div.outerHTML;
         }
-
         document.querySelector('#board').innerHTML = this.boardCellsHTML;
     }
 
-    markBoardCell(boardCell, activeCell) {
-        // Apply visual indicators on the board
-        activeCell.classList.add('clicked');
-        activeCell.classList.add(this.players.currentPlayer.class);
+    markBoardCell(boardCell, targetBoardCell) {
+        // Apply visual indicators on the board‚
+        targetBoardCell.classList.add('clicked');
+        targetBoardCell.classList.add(this.players.currentPlayer.class);
 
         // Update Board status
         this.playingBoard.map(item => {
             if (item.cellId === boardCell.cellId) {
-                item.player = this.players.currentPlayer.alias;
+                item.player = this.players.currentPlayer.name;
                 item.class = this.players.currentPlayer.class;
                 this.lastAction = item;
                 this.playersAction.push(this.lastAction);
@@ -44,12 +37,12 @@ export default class Board {
         this.playingBoard.map(item => {
             if (item.cellId === boardCell.cellId) {
                 // Apply visual indicators on the board
-                let activeCell = document.querySelector('#cell' + item.cellId);
-                if (activeCell.classList.contains(boardCell.class)) {
-                    activeCell.classList.remove(boardCell.class);
+                let targetBoardCell = document.querySelector('#cell' + item.cellId);
+                if (targetBoardCell.classList.contains(boardCell.class)) {
+                    targetBoardCell.classList.remove(boardCell.class);
                 }
-                if (activeCell.classList.contains('clicked')) {
-                    activeCell.classList.remove('clicked');
+                if (targetBoardCell.classList.contains('clicked')) {
+                    targetBoardCell.classList.remove('clicked');
                 }
 
                 item.player = '';
@@ -58,5 +51,12 @@ export default class Board {
             }
             return item;
         });
+    }
+
+    highlightWinBoardCells(combination = []) {
+        this.playingBoard.forEach((cell) => {
+            let highlightClass = combination.includes(cell.cellId) ? 'win' : 'lose';
+            document.getElementById('cell'+cell.cellId).classList.add(highlightClass);
+        });    
     }
 }

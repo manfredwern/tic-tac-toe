@@ -13,10 +13,10 @@ export default class Players {
         this._currentPlayer = player;
     }
 
-    setPlayer(alias, type = 'ai') {
+    addPlayer(playerName, type = 'ai') {
         const playerNumber = this._players.length + 1;
         this._players.push({
-            alias,
+            name: playerName,
             class: 'player' + playerNumber,
             type
         })

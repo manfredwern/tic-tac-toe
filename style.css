@@ -104,32 +104,68 @@ button:focus-visible {
 
 #board-container {
   padding: 2px; /* Add padding instead of border */
-  border: 2px solid black;
+  /* border: 2px solid black; */
   display: inline-block; /* Ensure the container only takes the necessary width */
+  background-color: #535bf2;
 }
 
 #board {
   display: grid;
   grid-template-columns: repeat(3, 100px);
   grid-template-rows: repeat(3, 100px);
-  gap: 2px;
-  border: 2px solid black;
+  gap: 12px;
+  /* border: 2px solid black; */
+  padding: 8px;
 }
 
 .cell {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2em;
-  border: 1px solid black;
+  font-size: 3rem;
+  font-weight: bolder;
+  text-transform: uppercase;
+  /* border: 1px solid black; */
   cursor: pointer;
+  background-color: whitesmoke;
+  border-radius: 4px;
 }
 
-.clicked {
+.win {
+  background-color: greenyellow !important;
+}
+
+.lose {
+  opacity: 0.7;
+}
+
+.hidden {
+  display: none;
+}
+
+.player1,
+.player2 {
+  display: block;
+  position: relative;
 }
 
 .player1 {
   background-color: lightblue;
+}
+
+.player2::after, 
+.player1::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.player1::after {
+  content: 'X';
+}
+.player2::after {
+  content: '0';
 }
 
 .player2 {
