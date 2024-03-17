@@ -12,6 +12,7 @@ export default class Game extends Board {
         this.hasWinner = false;
         this.isFirstPlayerTurn = true; // Set player 1 as the starting player
         this.players = new Players();
+        this.isLogs = false; // Set to true to see move history
         this.bind();
     }
 
@@ -22,6 +23,9 @@ export default class Game extends Board {
         this.setCurrentPlayer = this.setCurrentPlayer.bind(this);
         this.checkForWinningPlayer = this.checkForWinningPlayer.bind(this);
         this.highlightWinBoardCells = this.highlightWinBoardCells.bind(this);
+        this.onClickEvent = this.onClickEvent.bind(this);
+        this.endOfGame = this.endGame.bind(this);
+        this.undoAction = this.undoAction.bind(this);
     }
 
     setupGame() {
@@ -29,50 +33,60 @@ export default class Game extends Board {
         this.addCellClickEvents();
         this.addUndoClickEvent();
         this.disableUndoButton(true);
+        this.showLogs();
     }
 
     startGame() {
         // Setup Players
-        this.players.addPlayer('Cactus', 'human');
-        this.players.addPlayer('Jack');
+        this.players.addPlayer('X', 'human');
+        this.players.addPlayer('0', 'human');
         this.setCurrentPlayer();
-        this.updatePlayerInfo(this.players.currentPlayer.name + ' starts the game');
+        this.updatePlayerInfo(`${this.players.currentPlayer.name} goes first`);
         this.updateMoveHistory();
     }
 
     addCellClickEvents() {
-        console.log('addCellClickEvents', this.playingBoard);
         for (const boardCell of this.playingBoard) {
             let cellElement = document.querySelector('#cell' + boardCell.cellId);
-            cellElement.addEventListener('click', () => {
-                if (cellElement.classList.contains('clicked') || this.hasWinner) { return }
-
-                this.markBoardCell(boardCell, cellElement);
-                this.disableUndoButton(false);
-                this.updateMoveHistory(this.lastAction);
-                this.checkForWinningPlayer(this.players.currentPlayer.name);
-                this.switchPlayerTurn();
-                this.updateNextPlayerStatus();
-            });
+            cellElement.addEventListener('click', this.onClickEvent);
         }
     }
 
+    removeCellClickEvents() {
+        for (const boardCell of this.playingBoard) {
+            let cellElement = document.querySelector('#cell' + boardCell.cellId);
+            cellElement.removeEventListener('click', this.onClickEvent);
+        }
+    }
+
+    onClickEvent(event) {
+        const cellElement = event.target;
+        const cellId = parseInt(cellElement.id.split(/[a-z]+/).pop());
+
+        if (cellElement.classList.contains('clicked') || this.hasWinner) { return }
+        this.markBoardCell(cellId, cellElement);
+        this.disableUndoButton(false);
+        this.updateMoveHistory(this.lastAction);
+        this.checkForWinningPlayer(this.players.currentPlayer.name);
+        this.switchPlayerTurn();
+        this.updateNextPlayerStatus();
+    }
+
     updateMoveHistory() {
+        if (!this.showLogs) { return }
         document.querySelector('pre#action-list').innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
     }
 
     addUndoClickEvent() {
         const undoBtn = document.querySelector('button#undo');
-        undoBtn.addEventListener('click', () => {
-            this.undoAction(this.lastAction);
-        })
+        undoBtn.addEventListener('click', this.undoAction);
     }
 
-    undoAction(lastAction) {
+    undoAction() {
         if (!this.moveHistory.length) { return }
 
         // Update Board status
-        this.unmarkBoardCell(lastAction);
+        this.unmarkBoardCell(this.lastAction);
         this.switchPlayerTurn();
         this.updateNextPlayerStatus()
         this.disableUndoButton(true);
@@ -100,7 +114,7 @@ export default class Game extends Board {
         // Do not update if the games ends or a player wins
         if (this.moveHistory.length === this.playingBoard.length) {
             this.updatePlayerInfo('It\'s a draw!');
-            this.disableUndoButton(true);
+            this.endGame();
             return;
         }
 
@@ -110,25 +124,41 @@ export default class Game extends Board {
 
     checkForWinningPlayer(playerName) {
         let markedBoardCells = this.playingBoard.filter(item => item.player === playerName).map(item => item.cellId);
-        console.log('board: ', this.playingBoard);
-        console.log('marked: ', markedBoardCells);
         for (const winCombination of WIN_COMBINATIONS) {
             let winner = isSubset(markedBoardCells, winCombination);
             if (winner) {
-                console.log('winner', winner);
-                console.log('winner', markedBoardCells);
-                console.log('winner', winCombination);
-                this.updatePlayerInfo('The winner is: ' + playerName);
+                this.updatePlayerInfo(`${playerName} wins !!!`);
                 this.hasWinner = true;
-                this.disableUndoButton(true);
                 this.highlightWinBoardCells(winCombination);
+                this.endGame();
                 return;
             }
         }
     }
 
     updatePlayerInfo(player) {
-        document.querySelector('.active-game').innerHTML = player
+        console.log(this.lastAction.class);
+        const playerInfoElement = document.querySelector('div.active-player');
+
+        // Remove added classes from the player info
+        if (!this.lastAction?.class) {
+            playerInfoElement.className = playerInfoElement.classList.value.split(' ').shift();
+        }
+
+        playerInfoElement.classList.remove(this.lastAction.class + '-background');
+        playerInfoElement.classList.add(this.players.currentPlayer.class + '-background');
+        playerInfoElement.innerHTML = player
+    }
+
+    showLogs() {
+        if (!this.isLogs) {
+            document.querySelector('pre#action-list').classList.add('hidden');
+        }
+    }
+
+    endGame() {
+        this.disableUndoButton(true);
+        this.removeCellClickEvents();
     }
 }
 

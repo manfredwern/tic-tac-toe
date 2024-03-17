@@ -16,14 +16,14 @@ export default class Board {
         document.querySelector('#board').innerHTML = this.boardCellsHTML;
     }
 
-    markBoardCell(boardCell, targetBoardCell) {
+    markBoardCell(cellId, cellDivElement) {
         // Apply visual indicators on the board‚
-        targetBoardCell.classList.add('clicked');
-        targetBoardCell.classList.add(this.players.currentPlayer.class);
+        cellDivElement.classList.add('clicked');
+        cellDivElement.classList.add(this.players.currentPlayer.class);
 
         // Update Board status
         this.playingBoard.map(item => {
-            if (item.cellId === boardCell.cellId) {
+            if (item.cellId === cellId) {
                 item.player = this.players.currentPlayer.name;
                 item.class = this.players.currentPlayer.class;
                 this.lastAction = item;
@@ -37,12 +37,12 @@ export default class Board {
         this.playingBoard.map(item => {
             if (item.cellId === boardCell.cellId) {
                 // Apply visual indicators on the board
-                let targetBoardCell = document.querySelector('#cell' + item.cellId);
-                if (targetBoardCell.classList.contains(boardCell.class)) {
-                    targetBoardCell.classList.remove(boardCell.class);
+                let cellDivElement = document.querySelector('#cell' + item.cellId);
+                if (cellDivElement.classList.contains(boardCell.class)) {
+                    cellDivElement.classList.remove(boardCell.class);
                 }
-                if (targetBoardCell.classList.contains('clicked')) {
-                    targetBoardCell.classList.remove('clicked');
+                if (cellDivElement.classList.contains('clicked')) {
+                    cellDivElement.classList.remove('clicked');
                 }
 
                 item.player = '';
@@ -55,7 +55,7 @@ export default class Board {
 
     highlightWinBoardCells(combination = []) {
         this.playingBoard.forEach((cell) => {
-            let highlightClass = combination.includes(cell.cellId) ? 'win' : 'lose';
+            let highlightClass = this.players.currentPlayer.class + '--' + (combination.includes(cell.cellId) ? 'win' : 'lose');
             document.getElementById('cell'+cell.cellId).classList.add(highlightClass);
         });    
     }
