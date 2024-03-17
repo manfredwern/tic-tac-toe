@@ -37,6 +37,7 @@ export default class Game extends Board {
         this.players.addPlayer('Jack');
         this.setCurrentPlayer();
         this.updatePlayerInfo(this.players.currentPlayer.name + ' starts the game');
+        this.updateMoveHistory();
     }
 
     addCellClickEvents() {
@@ -56,7 +57,7 @@ export default class Game extends Board {
         }
     }
 
-    updateMoveHistory(action) {
+    updateMoveHistory() {
         document.querySelector('pre#action-list').innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
     }
 
