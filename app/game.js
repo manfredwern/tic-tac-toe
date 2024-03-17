@@ -3,6 +3,10 @@ import Players from "./players";
 import Board from './board';
 import { isSubset } from '../utils/isSubset';
 
+const UNDO_BUTTON = 'button#undo';
+const ACTIVE_PLAYER = 'div.active-player';
+const HISTORY = 'pre#move-logs';
+
 export default class Game extends Board {
 
     constructor() {
@@ -74,11 +78,11 @@ export default class Game extends Board {
 
     updateMoveHistory() {
         if (!this.showLogs) { return }
-        document.querySelector('pre#action-list').innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
+        document.querySelector(HISTORY).innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
     }
 
     addUndoClickEvent() {
-        const undoBtn = document.querySelector('button#undo');
+        const undoBtn = document.querySelector(UNDO_BUTTON);
         undoBtn.addEventListener('click', this.undoAction);
     }
 
@@ -94,7 +98,7 @@ export default class Game extends Board {
     }
 
     disableUndoButton(bool = true) {
-        const button = document.querySelector('button#undo');
+        const button = document.querySelector(UNDO_BUTTON);
         bool ? button.setAttribute('disabled', '') : button.removeAttribute('disabled');
     }
 
@@ -127,7 +131,7 @@ export default class Game extends Board {
         for (const winCombination of WIN_COMBINATIONS) {
             let winner = isSubset(markedBoardCells, winCombination);
             if (winner) {
-                this.updatePlayerInfo(`${playerName} wins !!!`);
+                this.updatePlayerInfo(`${playerName} wins!`);
                 this.hasWinner = true;
                 this.highlightWinBoardCells(winCombination);
                 this.endGame();
@@ -138,7 +142,7 @@ export default class Game extends Board {
 
     updatePlayerInfo(player) {
         console.log(this.lastAction.class);
-        const playerInfoElement = document.querySelector('div.active-player');
+        const playerInfoElement = document.querySelector(ACTIVE_PLAYER);
 
         // Remove added classes from the player info
         if (!this.lastAction?.class) {
@@ -152,7 +156,7 @@ export default class Game extends Board {
 
     showLogs() {
         if (!this.isLogs) {
-            document.querySelector('pre#action-list').classList.add('hidden');
+            document.querySelector(HISTORY).classList.add('hidden');
         }
     }
 

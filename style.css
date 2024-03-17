@@ -152,7 +152,7 @@ body {
   content: '0';
 }
 
-pre#action-list {
+pre#move-logs {
   width: 337px;
   height: 180px;
   overflow: scroll;

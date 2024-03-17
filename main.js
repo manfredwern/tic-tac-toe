@@ -1,9 +1,11 @@
 import './style.css'
 import Game from './app/game.js'
 
+const GAME_TITLE = 'Tic-Tac-Toe';
+const NEW_GAME_BTN = 'button#new-game';
 
 document.querySelector('#app').innerHTML = `
-<h1 class="game-title">Tic-Tac-Toe</h1>
+<h1 class="game-title">${GAME_TITLE}</h1>
 
 <div class="active-player"></div>
 
@@ -14,11 +16,11 @@ document.querySelector('#app').innerHTML = `
   <button id="new-game" type="button">New Game</button>
 </div>
 
-<pre id="action-list"></pre>
+<pre id="move-logs"></pre>
 `;
 
 function addClickEventToNewGameBtn() {
-  const newGameBtn = document.querySelector('button#new-game');
+  const newGameBtn = document.querySelector(NEW_GAME_BTN);
   newGameBtn.addEventListener('click', startNewGame);
 }
 
