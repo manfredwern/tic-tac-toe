@@ -1,36 +1,36 @@
-import './style.css'
-import Game from './app/game.js'
+import './style.css';
+import Game from './app/game.js';
 
 const GAME_TITLE = 'Tic-Tac-Toe';
-const NEW_GAME_BTN = 'button#new-game';
+const UNDO_STR = 'Undo';
+const NEW_GAME_STR = 'New Game';
+const NEW_GAME_SELECTOR = 'button#new-game';
 
 document.querySelector('#app').innerHTML = `
 <h1 class="game-title">${GAME_TITLE}</h1>
 
-<div class="active-player"></div>
+<div class="game-status"></div>
 
-<div id="board-container"><div id="board"></div></div>
+<div id="board-container">
+  <div id="board"></div>
+</div>
 
 <div id="game-control">
-  <button id="undo" type="button">Undo</button>
-  <button id="new-game" type="button">New Game</button>
+  <button id="undo" type="button">${UNDO_STR}</button>
+  <button id="new-game" type="button">${NEW_GAME_STR}</button>
 </div>
 
 <pre id="move-logs"></pre>
 `;
 
-function addClickEventToNewGameBtn() {
-  const newGameBtn = document.querySelector(NEW_GAME_BTN);
-  newGameBtn.addEventListener('click', startNewGame);
-}
-
-function startNewGame() {
-  const newGame = new Game();
-  newGame.setupGame();
-  newGame.startGame();
+function playTitTacToe() {
+  const boadGame = new Game();
+  boadGame.initializeBoard();
+  boadGame.startGame();
 }
 
 window.onload = () => {
-  startNewGame();
-  addClickEventToNewGameBtn();
+  playTitTacToe();
+  const newGameBtn = document.querySelector(NEW_GAME_SELECTOR);
+  newGameBtn.addEventListener('click', playTitTacToe);
 }

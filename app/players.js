@@ -13,17 +13,16 @@ export default class Players {
         this._currentPlayer = player;
     }
 
-    addPlayer(playerName, type = 'ai') {
+    addPlayer(playerName) {
         const playerNumber = this._players.length + 1;
         this._players.push({
             name: playerName,
-            class: 'player' + playerNumber,
-            type
+            className: 'player' + playerNumber
         })
     }
 
     allPlayers() {
         return this._players;
     }
-
+    
 }

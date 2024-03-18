@@ -1,10 +1,12 @@
 import { generateBoardCellsData } from "../constants/playingBoard";
 
-const BOARD = 'div#board';
-const CELL = 'div#cell';
+const BOARD_SELECTOR = 'div#board';
+const CELL_SELECTOR = 'div#cell';
 
 export default class Board {
+
     constructor() {
+        // Use a function instead of a variable to return board cells to avoid mutation
         this.playingBoard = generateBoardCellsData();
         this.boardCellsHTML = '';
     }
@@ -16,19 +18,19 @@ export default class Board {
             div.setAttribute('class', 'cell');
             this.boardCellsHTML += div.outerHTML;
         }
-        document.querySelector(BOARD).innerHTML = this.boardCellsHTML;
+        document.querySelector(BOARD_SELECTOR).innerHTML = this.boardCellsHTML;
     }
 
-    markBoardCell(cellId, cellDivElement) {
-        // Apply visual indicators on the board‚
-        cellDivElement.classList.add('clicked');
-        cellDivElement.classList.add(this.players.currentPlayer.class);
+    markBoardCell(cellId, cellDiv) {
+        // Apply visual indicators to the board‚
+        cellDiv.classList.add('clicked');
+        cellDiv.classList.add(this.players.currentPlayer.className);
 
         // Update Board status
         this.playingBoard.map(item => {
             if (item.cellId === cellId) {
                 item.player = this.players.currentPlayer.name;
-                item.class = this.players.currentPlayer.class;
+                item.className = this.players.currentPlayer.className;
                 this.lastAction = item;
                 this.moveHistory.push(this.lastAction);
             }
@@ -36,20 +38,21 @@ export default class Board {
         });
     }
 
-    unmarkBoardCell(boardCell) {
+    unmarkBoardCell({cellId, className}) {
         this.playingBoard.map(item => {
-            if (item.cellId === boardCell.cellId) {
-                // Apply visual indicators on the board
-                let cellDivElement = document.querySelector(CELL + item.cellId);
-                if (cellDivElement.classList.contains(boardCell.class)) {
-                    cellDivElement.classList.remove(boardCell.class);
+            if (item.cellId === cellId) {
+                // Apply visual indicators to the board
+                let cellDiv = document.querySelector(CELL_SELECTOR + item.cellId);
+                if (cellDiv.classList.contains(className)) {
+                    cellDiv.classList.remove(className);
                 }
-                if (cellDivElement.classList.contains('clicked')) {
-                    cellDivElement.classList.remove('clicked');
+                if (cellDiv.classList.contains('clicked')) {
+                    cellDiv.classList.remove('clicked');
                 }
 
+                // Update Board status
                 item.player = '';
-                item.class = '';
+                item.className = '';
                 this.moveHistory = this.moveHistory.filter(action => action !== boardCell);
             }
             return item;
@@ -58,8 +61,11 @@ export default class Board {
 
     highlightWinBoardCells(combination = []) {
         this.playingBoard.forEach((cell) => {
-            let highlightClass = this.players.currentPlayer.class + '--' + (combination.includes(cell.cellId) ? 'win' : 'lose');
-            document.querySelector(CELL+cell.cellId).classList.add(highlightClass);
-        });    
+            const hasWon = combination.includes(cell.cellId);
+            const { className } = this.players.currentPlayer;
+            const highlightClass = className + '--' + (hasWon ? 'win' : 'lose');
+            document.querySelector(CELL_SELECTOR + cell.cellId).classList.add(highlightClass);
+        });
     }
+
 }

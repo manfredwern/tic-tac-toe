@@ -3,9 +3,12 @@ import Players from "./players";
 import Board from './board';
 import { isSubset } from '../utils/isSubset';
 
-const UNDO_BUTTON = 'button#undo';
-const ACTIVE_PLAYER = 'div.active-player';
-const HISTORY = 'pre#move-logs';
+const CELL_SELECTOR = 'div#cell';
+const UNDO_BUTTON_SELECTOR = 'button#undo';
+const GAME_STATUS_SELECTOR = 'div.game-status';
+const HISTORY_SELECTOR = 'pre#move-logs';
+const PLAYER_1 = 'X';
+const PLAYER_2 = 'O';
 
 export default class Game extends Board {
 
@@ -22,43 +25,44 @@ export default class Game extends Board {
 
     bind() {
         this.addCellClickEvents = this.addCellClickEvents.bind(this);
-        this.addUndoClickEvent = this.addUndoClickEvent.bind(this);
+        this.addUndoClickEvent = this.addUndoButtonEvent.bind(this);
         this.startGame = this.startGame.bind(this);
         this.setCurrentPlayer = this.setCurrentPlayer.bind(this);
         this.checkForWinningPlayer = this.checkForWinningPlayer.bind(this);
         this.highlightWinBoardCells = this.highlightWinBoardCells.bind(this);
         this.onClickEvent = this.onClickEvent.bind(this);
+        this.onUndoMove = this.onUndoMove.bind(this);
         this.endOfGame = this.endGame.bind(this);
-        this.undoAction = this.undoAction.bind(this);
     }
 
-    setupGame() {
+    initializeBoard() {
         this.createBoard();
         this.addCellClickEvents();
-        this.addUndoClickEvent();
+        this.addUndoButtonEvent();
         this.disableUndoButton(true);
         this.showLogs();
     }
 
     startGame() {
         // Setup Players
-        this.players.addPlayer('X', 'human');
-        this.players.addPlayer('0', 'human');
+        this.players.addPlayer(PLAYER_1);
+        this.players.addPlayer(PLAYER_2);
         this.setCurrentPlayer();
-        this.updatePlayerInfo(`${this.players.currentPlayer.name} goes first`);
+        // Game Status
+        this.updateGameStatusBoard(`${this.players.currentPlayer.name} goes first`);
         this.updateMoveHistory();
     }
 
     addCellClickEvents() {
         for (const boardCell of this.playingBoard) {
-            let cellElement = document.querySelector('#cell' + boardCell.cellId);
+            let cellElement = document.querySelector(CELL_SELECTOR + boardCell.cellId);
             cellElement.addEventListener('click', this.onClickEvent);
         }
     }
 
     removeCellClickEvents() {
         for (const boardCell of this.playingBoard) {
-            let cellElement = document.querySelector('#cell' + boardCell.cellId);
+            let cellElement = document.querySelector(CELL_SELECTOR + boardCell.cellId);
             cellElement.removeEventListener('click', this.onClickEvent);
         }
     }
@@ -78,15 +82,20 @@ export default class Game extends Board {
 
     updateMoveHistory() {
         if (!this.showLogs) { return }
-        document.querySelector(HISTORY).innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
+        document.querySelector(HISTORY_SELECTOR).innerHTML = this.moveHistory.map(move => JSON.stringify(move)).join('\n');
     }
 
-    addUndoClickEvent() {
-        const undoBtn = document.querySelector(UNDO_BUTTON);
-        undoBtn.addEventListener('click', this.undoAction);
+    addUndoButtonEvent() {
+        const undoBtn = document.querySelector(UNDO_BUTTON_SELECTOR);
+        undoBtn.addEventListener('click', this.onUndoMove);
     }
 
-    undoAction() {
+    removeUndoButtonEvent() {
+        const undoBtn = document.querySelector(UNDO_BUTTON_SELECTOR);
+        undoBtn.removeEventListener('click', this.onUndoMove);
+    }
+
+    onUndoMove() {
         if (!this.moveHistory.length) { return }
 
         // Update Board status
@@ -98,7 +107,7 @@ export default class Game extends Board {
     }
 
     disableUndoButton(bool = true) {
-        const button = document.querySelector(UNDO_BUTTON);
+        const button = document.querySelector(UNDO_BUTTON_SELECTOR);
         bool ? button.setAttribute('disabled', '') : button.removeAttribute('disabled');
     }
 
@@ -114,16 +123,16 @@ export default class Game extends Board {
     }
 
     updateNextPlayerStatus() {
+        // Do not update if the game ends or a player wins
         if (this.hasWinner) { return }
-        // Do not update if the games ends or a player wins
         if (this.moveHistory.length === this.playingBoard.length) {
-            this.updatePlayerInfo('It\'s a draw!');
+            this.updateGameStatusBoard('It\'s a draw!');
             this.endGame();
             return;
         }
 
         const suffixMessage = this.players.currentPlayer.name.match(/s$/) ? '\' turn' : '\'s turn';
-        this.updatePlayerInfo(this.players.currentPlayer.name + suffixMessage);
+        this.updateGameStatusBoard(this.players.currentPlayer.name + suffixMessage);
     }
 
     checkForWinningPlayer(playerName) {
@@ -131,7 +140,7 @@ export default class Game extends Board {
         for (const winCombination of WIN_COMBINATIONS) {
             let winner = isSubset(markedBoardCells, winCombination);
             if (winner) {
-                this.updatePlayerInfo(`${playerName} wins!`);
+                this.updateGameStatusBoard(`${playerName} wins!`);
                 this.hasWinner = true;
                 this.highlightWinBoardCells(winCombination);
                 this.endGame();
@@ -140,29 +149,29 @@ export default class Game extends Board {
         }
     }
 
-    updatePlayerInfo(player) {
-        console.log(this.lastAction.class);
-        const playerInfoElement = document.querySelector(ACTIVE_PLAYER);
+    updateGameStatusBoard(statusMessage = '') {
+        const boardDiv = document.querySelector(GAME_STATUS_SELECTOR);
 
-        // Remove added classes from the player info
-        if (!this.lastAction?.class) {
-            playerInfoElement.className = playerInfoElement.classList.value.split(' ').shift();
+        // Remove added classes from the game status on a new game
+        if (!this.lastAction?.className) {
+            boardDiv.className = boardDiv.classList.value.split(' ').shift();
         }
 
-        playerInfoElement.classList.remove(this.lastAction.class + '-background');
-        playerInfoElement.classList.add(this.players.currentPlayer.class + '-background');
-        playerInfoElement.innerHTML = player
+        boardDiv.classList.remove(this.lastAction.className + '-background');
+        boardDiv.classList.add(this.players.currentPlayer.className + '-background');
+        boardDiv.innerHTML = statusMessage
     }
 
     showLogs() {
         if (!this.isLogs) {
-            document.querySelector(HISTORY).classList.add('hidden');
+            document.querySelector(HISTORY_SELECTOR).classList.add('hidden');
         }
     }
 
     endGame() {
         this.disableUndoButton(true);
         this.removeCellClickEvents();
+        this.removeUndoButtonEvent();
     }
 }
 
