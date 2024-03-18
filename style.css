@@ -1,0 +1,224 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Game colors */
+  --player1-color: #F0EB8D;
+  --player2-color: #EB455F;
+  --white: #ffffff;
+  --page-bg: #2B3467;
+  --cell-bg: #3e4985;
+  --button-bg: #c6c2c2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--page-bg);
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 32px;
+}
+
+.game-title {
+  font-size: 25px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--white);
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 16px;
+  margin: 0;
+}
+
+/* Board styles */
+#board-container {
+  display: inline-block;
+  background-color: transparent;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 14px;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  font-weight: bolder;
+  text-transform: uppercase;
+  cursor: pointer;
+  background-color: var(--cell-bg);
+  border-radius: 4px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cell:not(.clicked):hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  -webkit-filter: brightness(1.3);
+          filter: brightness(1.3);
+}
+
+.hidden {
+  display: none;
+}
+
+/* Player's turn info styles */
+.game-status {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 2rem;
+  font-weight: bolder;
+  margin: 0 auto;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-status.player1-background {
+  color: var(--player1-color);
+}
+
+.game-status.player2-background {
+  color: var(--player2-color);
+}
+
+/* Player styles */
+.player1 {
+  display: block;
+  position: relative;
+  color: var(--player1-color);
+}
+
+.player2 {
+  display: block;
+  position: relative;
+  color: var(--player2-color);
+}
+
+.player1--win {
+  background-color: var(--player1-color);
+  color: var(--cell-bg);
+}
+
+.player2--win {
+  background-color: var(--player2-color);
+  color: var(--cell-bg);
+}
+
+.player1--lose,
+.player2--lose {
+  opacity: 0.5;
+}
+
+.player2::after,
+.player1::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+}
+
+.player1::after {
+  content: 'X';
+}
+
+.player2::after {
+  content: '0';
+}
+
+pre#move-logs {
+  width: 337px;
+  height: 180px;
+  overflow: scroll;
+  white-space: pre;
+  text-wrap: balance;
+  text-align: left;
+  color: var(--white);
+}
+
+/* Game Control styles */
+div#game-control {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--cell-bg);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: -webkit-filter 0.3s ease;
+  transition: filter 0.3s ease;
+  transition: filter 0.3s ease, -webkit-filter 0.3s ease;
+  box-shadow: 0 4px 0 #c6c2c2;
+  background-color: #f9f9f9;
+}
+
+button:hover {
+  -webkit-filter: brightness(1.1);
+          filter: brightness(1.1);
+}
+
+button::before {
+  content: "";
+  border-radius: 16px;
+  box-shadow: 0 4px 0;
+  color: var(--button-bg);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+}
+
+button:active {
+  -webkit-transform: translateY(4px) translateZ(0);
+          transform: translateY(4px) translateZ(0);
+  box-shadow: none;
+}
+
+button:active::before {
+  box-shadow: none;
+}
+
+button:disabled {
+  -webkit-filter: contrast(0.5);
+          filter: contrast(0.5);
+}
