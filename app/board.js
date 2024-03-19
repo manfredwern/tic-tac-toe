@@ -38,13 +38,13 @@ export default class Board {
         });
     }
 
-    unmarkBoardCell({cellId, className}) {
+    unmarkBoardCell(boardCell) {
         this.playingBoard.map(item => {
-            if (item.cellId === cellId) {
+            if (item.cellId === boardCell.cellId) {
                 // Apply visual indicators to the board
                 let cellDiv = document.querySelector(CELL_SELECTOR + item.cellId);
-                if (cellDiv.classList.contains(className)) {
-                    cellDiv.classList.remove(className);
+                if (cellDiv.classList.contains(boardCell.className)) {
+                    cellDiv.classList.remove(boardCell.className);
                 }
                 if (cellDiv.classList.contains('clicked')) {
                     cellDiv.classList.remove('clicked');
