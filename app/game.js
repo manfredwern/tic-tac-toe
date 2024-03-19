@@ -164,7 +164,7 @@ export default class Game extends Board {
 
     showLogs() {
         if (!this.isLogs) {
-            document.querySelector(HISTORY_SELECTOR).classList.add('hidden');
+            document.querySelector(HISTORY_SELECTOR)?.classList.add('hidden');
         }
     }
 
