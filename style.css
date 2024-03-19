@@ -188,6 +188,7 @@ button {
   transition: filter 0.3s ease, -webkit-filter 0.3s ease;
   box-shadow: 0 4px 0 #c6c2c2;
   background-color: #f9f9f9;
+  position: relative;
 }
 
 button:hover {
